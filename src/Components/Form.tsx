@@ -1,23 +1,46 @@
 import { useForm } from "react-hook-form";
 import Error from "./Error";
 import { DraftPatient } from "../types";
+import { toast } from "react-toastify";
 import { usePatientStore } from "../Store";
+import { useEffect } from "react";
 
 function Form() {
-
-    const addPatient = usePatientStore(state => state.addPatient)
-    
+  const addPatient = usePatientStore((state) => state.addPatient);
+  const activeId = usePatientStore((state) => state.activeId);
+  const patients = usePatientStore((state) => state.patients);
+  const updatedPatient = usePatientStore((state) => state.updatedPatient);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
-    reset
+    reset,
   } = useForm<DraftPatient>();
 
-  const registerPatient = (data : DraftPatient) => {
-    addPatient(data)
-    reset()
+  useEffect(() => {
+    const activePatient = patients.filter(
+      (patient) => patient.id === activeId
+    )[0];
+    if (activeId) {
+      setValue("name", activePatient.name),
+        setValue("caretaker", activePatient.caretaker),
+        setValue("email", activePatient.email),
+        setValue("date", activePatient.date),
+        setValue("symptoms", activePatient.symptoms);
+    }
+  }, [activeId]);
+
+  const registerPatient = (data: DraftPatient) => {
+    if(activeId) {
+      updatedPatient(data)
+      toast.success('Paciente Actualizado correctamente')
+    } else {
+      addPatient(data);
+      toast.success('Paciente registrado correctamente')
+    }
+    reset();
   };
 
   return (
@@ -77,12 +100,12 @@ function Form() {
             type="email"
             placeholder="Email de Registro"
             {...register("email", {
-                required: "El Email es Obligatorio",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Email No Válido'
-                }
-              })} 
+              required: "El Email es Obligatorio",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Email No Válido",
+              },
+            })}
           />
           {errors.email && <Error>{errors.email?.message}</Error>}
         </div>
@@ -96,10 +119,10 @@ function Form() {
             className="w-full p-3  border border-gray-100"
             type="date"
             {...register("date", {
-                required: "La fecha de registro es obligatoria",
-              })}
-            />
-            {errors.date && <Error>{errors.date?.message}</Error>}
+              required: "La fecha de registro es obligatoria",
+            })}
+          />
+          {errors.date && <Error>{errors.date?.message}</Error>}
         </div>
 
         <div className="mb-5">
@@ -111,10 +134,10 @@ function Form() {
             className="w-full p-3  border border-gray-100"
             placeholder="Síntomas del paciente"
             {...register("symptoms", {
-                required: "Los sintomas son obligatorios",
-              })}
-            />
-              {errors.symptoms && <Error>{errors.symptoms?.message}</Error>}
+              required: "Los sintomas son obligatorios",
+            })}
+          />
+          {errors.symptoms && <Error>{errors.symptoms?.message}</Error>}
         </div>
 
         <input

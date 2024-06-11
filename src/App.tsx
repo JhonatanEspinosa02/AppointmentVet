@@ -1,5 +1,8 @@
+import {ToastContainer} from "react-toastify"
 import Form from "./Components/Form"
 import List from "./Components/List"
+import "react-toastify/dist/ReactToastify.css"
+
 
 function App() {
   
@@ -17,6 +20,7 @@ function App() {
         </div>
 
       </div>
+      <ToastContainer/>
     </>
   )
 }
